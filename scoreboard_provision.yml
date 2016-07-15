@@ -1,0 +1,44 @@
+- name: Setup and configure AWS components for scoreboard
+  hosts: all
+  become: true
+  gather_facts: false 
+  tasks:
+  - name: Fail if not on the CTF scoreboard instance
+    assert: { that: "ec2_tag_Name == '{{ scoreboard_name }}'" }
+
+  - name: Install pre-requisite packages
+    apt:
+      name: git
+
+  - name: Pull down Facebook CTF Platform from GitHub
+    git:
+      repo: https://github.com/facebook/fbctf.git
+      dest: /root/fbctf
+      update: no
+
+  - name: Change CODE_PATH in provision.sh to point at /root/fbctf
+    lineinfile:
+      dest: /root/fbctf/extra/provision.sh
+      regexp: ^CODE_PATH\=
+      line: 'CODE_PATH="/root/fbctf"'
+
+  - name: Install Facebook CTF Platform (long wait)
+    shell: ./provision.sh
+    args:
+      chdir: /root/fbctf/extra
+      creates: /var/www/fbctf
+
+  - name: Change number of MySQL connections
+    lineinfile:
+      dest: /etc/mysql/my.cnf
+      regexp: "^max_connections"
+      insertafter: "^#max_connections"
+      line: "max_connections = {{ scoreboard_mysql_connections }}"
+    notify:
+    - Restart MySQL
+
+  handlers:
+    - name: Restart MySQL
+      service:
+        name: mysql
+        state: restarted
