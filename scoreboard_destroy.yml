@@ -1,0 +1,93 @@
+---
+- name: Clean up all scoreboard components from AWS
+  hosts: localhost 
+  connection: local
+  gather_facts: True
+  tasks:
+
+  - name: Gather ec2 facts
+    ec2_remote_facts:
+      region: "{{ aws_region }}"
+      filters:
+        instance-state-name: running
+        "tag:Name": "{{ scoreboard_name }}"
+    register: ec2_facts
+  
+  - name: Debug - scoreboard instance_id 
+    debug: var=ec2_facts['instances'][0]['id'] verbosity=2
+  
+  - name: Release Elastic IP from scoreboard
+    ec2_eip:
+      state: absent
+      region: "{{ aws_region }}"
+      device_id: "{{ ec2_facts['instances'][0]['id'] }}"
+      release_on_disassociation: yes
+      
+  - name: Remove scoreboard ec2 instance
+    ec2:
+      state: absent
+      region: "{{ aws_region }}"
+      instance_ids: "{{ ec2_facts['instances'][0]['id'] }}"
+      termination_protection: no
+      wait: yes
+
+  - name: Remove scoreboard key pair
+    ec2_key:
+      name: "{{ scoreboard_key_name }}"
+      region: "{{ aws_region }}"
+      state: absent
+
+  - name: Remove scoreboard security group
+    ec2_group:
+      name: "{{ scoreboard_security_group }}"  
+      description: Security rules for CTF scoreboard
+      region: "{{ aws_region }}"
+      state: absent
+
+  - name: Gather VPC subnet facts
+    ec2_vpc_subnet_facts:
+      region: "{{ aws_region }}"
+      filters:
+        "tag:Name": "{{ scoreboard_subnet_name }}"
+    register: subnet
+
+  - name: Debug - subnet 
+    debug: var=subnet['subnets'][0]['vpc_id'] verbosity=2
+
+  - name: Remove subnet for scoreboard
+    ec2_vpc_subnet:
+      state: absent 
+      vpc_id: "{{ subnet['subnets'][0]['vpc_id'] }}"
+      region: "{{ aws_region }}"
+      cidr: "{{ scoreboard_cidr }}"
+      resource_tags:
+        Name: "{{ scoreboard_subnet_name }}"
+
+  - name: Gather VPC route table facts
+    ec2_vpc_route_table_facts:
+      region: "{{ aws_region }}"
+      filters:
+        "tag:Name": "{{ scoreboard_route_table_name }}"
+    register: route_table
+
+  - name: Debug - route_table
+    debug: var=route_table['route_tables'][0]['vpc_id'] verbosity=2
+
+  - name: Remove scoreboard route table
+    ec2_vpc_route_table:
+      vpc_id: "{{ route_table['route_tables'][0]['vpc_id'] }}"
+      region: "{{ aws_region }}"
+      state: absent
+      tags:
+        Name: "{{ scoreboard_route_table_name }}" 
+
+  - name: Remove scoreboard VPC
+    ec2_vpc:
+      state: absent 
+      cidr_block: "{{ scoreboard_vpc_cidr_block }}"
+      resource_tags: { "Name":"{{ scoreboard_vpc_name }}" }
+      region: "{{ aws_region }}"
+
+  - name: Debug - Print all variables
+    debug: var=hostvars[inventory_hostname] verbosity=4
+
