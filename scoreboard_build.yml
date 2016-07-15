@@ -85,8 +85,8 @@
       group: "{{ scoreboard_security_group }}"
     register: scoreboard
   
-  - name: Debug - scoreboard
-    debug: var=scoreboard verbosity=2
+  - name: Debug - scoreboard instance_id
+    debug: var=scoreboard['tagged_instances'][0]['id'] verbosity=2
   
   - name: Add Elastic IP to VPC for use with EC2 instance
     ec2_eip:
