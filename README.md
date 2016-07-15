@@ -25,7 +25,7 @@ export AWS_SECRET_ACCESS_KEY='YOUR_SECRET_KEY_HERE'
 
 ### Create and configure AWS components  
 
-After running the following playbook you will have to wait for the ec2 instance to initialize before running the provisioning script.  This takes a long time [10 minutes?  get a real number here].  
+After running the following playbook you will have to wait for the ec2 instance to initialize before running the provisioning script.  This takes 3-4 minutes for a t2.large  
 
 ```
 ansible-playbook -i ec2.py -u ubuntu scoreboard-build.yml  
@@ -33,7 +33,7 @@ ansible-playbook -i ec2.py -u ubuntu scoreboard-build.yml
 
 ### Provision the Facebook CTF software onto the scoreboard  
 
-This takes a really long time.  After it is done you can access the Facebook CTF platform at the IP address in the playbook output.  
+This playbook 7-8 minutes to run on a t2.large.  After it is done you can access the Facebook CTF platform at the IP address in the playbook output.  
 
 ```
 ansible-playbook -i ec2.py -u ubuntu scoreboard-provision.yml  
