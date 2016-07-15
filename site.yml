@@ -1,4 +1,0 @@
----
-- name: Bring up r00tz CTF Infrastructure
-  include: scoreboard.yml
-  include: challenges.yml
