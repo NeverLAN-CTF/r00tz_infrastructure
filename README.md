@@ -17,7 +17,7 @@ Apply the following policies to the r00tz group:
 Next take the access key and secret key generated during the user creation and export them to your current environment for the ec2.py ansible dynamic inventory script to use.  
 
 ```
-export AWS_ACCESS_KEY='YOUR_ACCESS_KEY_HERE'  
+export AWS_ACCESS_KEY_ID='YOUR_ACCESS_KEY_HERE'  
 export AWS_SECRET_ACCESS_KEY='YOUR_SECRET_KEY_HERE'  
 ```
 
