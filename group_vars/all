@@ -1,0 +1,41 @@
+---
+# Global
+aws_region: "us-west-2"
+
+# Scoreboard
+
+# us-west-2 Ubuntu 14.04
+scoreboard_ami_id: "ami-65579105"
+scoreboard_vpc_name: "r00tz_scoreboard_vpc"
+scoreboard_vpc_cidr_block: "172.18.0.0/16"
+scoreboard_name: "r00tz_scoreboard"
+scoreboard_instance_type: "t2.large"
+scoreboard_cidr: "172.18.42.0/24"
+scoreboard_subnet_name: "r00tz_scoreboard_subnet"
+scoreboard_route_table_name: "r00tz_scoreboard_route"
+scoreboard_security_group: "r00tz_scoreboard_group"
+scoreboard_key_name: "r00tz_scoreboard"
+scoreboard_key_path: "~/.ssh/r00tz_rsa.pub"
+scoreboard_mysql_connections: 1000
+
+# http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html
+challenges_ami_id: "ami-241bd844"
+challenges_instance_count: 1
+challenges_vpc_name: "r00tz_challenges_vpc"
+challenges_vpc_cidr_block: "172.19.0.0/16"
+challenges_name: "r00tz_challenges"
+challenges_instance_type: "t2.micro"
+challenges_cidr: "172.19.42.0/24"
+challenges_subnet_name: "r00tz_challenges_subnet"
+challenges_route_table_name: "r00tz_challenges_route"
+challenges_security_group: "r00tz_challenges_group"
+challenges_key_name: "r00tz_challenges"
+challenges_key_path: "~/.ssh/r00tz_rsa.pub"
+challenges_ecs_name: "r00tz_challenges_ecs"
+challenges_containers:
+  - name: "r00tz_seasurf"
+    cpu: 64
+    memory: 64
+    image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/seasurf:latest"
+    containerPort: 80
+    hostPort: 1234
