@@ -1,14 +1,20 @@
 - name: Setup and configure AWS components for scoreboard
   hosts: all
   become: true
-  gather_facts: false 
+  gather_facts: false
   tasks:
   - name: Fail if not on the CTF scoreboard instance
     assert: { that: "ec2_tag_Name == '{{ scoreboard_name }}'" }
 
+  - name: Add authorized_keys to ubuntu user
+    authorized_key:
+      user: ubuntu
+      key: "{{ key_gulshan }}"
+
   - name: Install pre-requisite packages
     apt:
       name: git
+      state: present
 
   - name: Pull down Facebook CTF Platform from GitHub
     git:
