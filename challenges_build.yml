@@ -106,6 +106,7 @@
       name: "{{ challenges_elb_name }}"
       state: present
       region: "{{ aws_region }}"
+      purge_listeners: False
       security_group_names:
         - "{{ challenges_security_group }}"
       subnets:
