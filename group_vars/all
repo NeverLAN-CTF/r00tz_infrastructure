@@ -31,6 +31,7 @@ challenges_route_table_name: "r00tz_challenges_route"
 challenges_security_group: "r00tz_challenges_group"
 challenges_key_name: "r00tz_challenges"
 challenges_key_path: "~/.ssh/r00tz_rsa.pub"
+challenges_elb_name: "r00tz-challenges-elb"
 challenges_ecs_name: "r00tz_challenges_ecs"
 challenges_containers:
   - name: "r00tz_seasurf"
