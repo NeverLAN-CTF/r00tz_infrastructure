@@ -1,0 +1,53 @@
+---
+- name: Slack scoreboard stats
+  hosts: all
+  become: true
+  gather_facts: false 
+  tasks:
+  - name: Fail if not on the CTF scoreboard instance
+    assert: { that: "ec2_tag_Name == '{{ scoreboard_name }}'" }
+
+  - name: Pull memory usage from scoreboard
+    shell: "free -m | tail -n3 | head -n1 | awk '{print\"total: \" $2\" used: \"$3\" free: \"$4}'"
+    register: memory 
+
+  - name: Debug - memory
+    debug: var=memory['stdout'] verbosity=2
+
+  - name: Pull uptime from scoreboard
+    command: "uptime"
+    register: uptime 
+
+  - name: Debug - uptime 
+    debug: var=uptime['stdout'] verbosity=2
+
+  - name: Pull MySQL connections from scoreboard
+    shell: "mysqladmin -u ctf -pctf extended-status | grep -wi 'threads_connected\\|threads_running' | awk '{ print $2,$4}' | tail -n2 | tr '\n' '|' | sed 's/|/ - /' | sed 's/|//'"
+    register: mysql
+
+  - name: Debug - mysql
+    debug: var=mysql['stdout'] verbosity=2
+
+  - name: Post message to Slack
+    slack:
+      channel: "infrastructure"
+      token: "T1D9S5FHC/B1S974WTD/Tzm66a0KYkiU9ZkcZ4dPtTSQ"
+      attachments:
+        - text: "Usage statistics of scoreboard instance."
+          color: "#ff00dd"
+          title: "Scoreboard Stats"
+          thumb_url: "http://orig15.deviantart.net/e81f/f/2012/343/0/8/free_grumpy_cat_icon_by_glad_sad-d5njvpw.png"
+          fields:
+            - title: "IP"
+              value: "{{ inventory_hostname }}"
+              short: true
+            - title: "Memory"
+              value: "{{ memory['stdout'] }}"
+              short: false
+            - title: "MySQL Connections"
+              value: "{{ mysql['stdout'] }}"
+              short: false 
+            - title: "Uptime"
+              value: "{{ uptime['stdout'] }}"
+              short: false
+      username: "Ansible on r00tz"
