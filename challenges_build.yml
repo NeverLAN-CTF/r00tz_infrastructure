@@ -1,0 +1,166 @@
+---
+- name: Setup AWS components for challenges infrastructure
+  hosts: localhost
+  connection: local
+  tasks:
+
+  - name: Provision VPC for CTF challenges
+    ec2_vpc:
+      state: present
+      cidr_block: "{{ challenges_vpc_cidr_block }}"
+      resource_tags: { "Name":"{{ challenges_vpc_name }}" }
+      region: "{{ aws_region }}"
+      internet_gateway: true
+      wait: yes
+    register: subnet 
+
+  - name: Debug - vpc_id
+    debug: var=subnet['vpc_id'] verbosity=2
+
+  - name: Create subnet for challenges
+    ec2_vpc_subnet:
+      state: present
+      vpc_id: "{{ subnet['vpc_id'] }}"
+      region: "{{ aws_region }}"
+      cidr: "{{ challenges_cidr }}"
+      resource_tags:
+        Name: "{{ challenges_subnet_name }}"
+    register: challenges_subnet
+
+  - name: Debug - subnet_id 
+    debug: var=challenges_subnet['subnet']['id'] verbosity=2
+
+  - name: Configure public route table for VPC
+    ec2_vpc_route_table:
+      vpc_id: "{{ subnet['vpc_id'] }}"
+      region: "{{ aws_region }}"
+      tags:
+        Name: "{{ challenges_route_table_name }}" 
+      subnets:
+        - "{{ challenges_subnet['subnet']['id'] }}"
+      routes:
+        - dest: 0.0.0.0/0
+          gateway_id: "{{ subnet['igw_id'] }}"
+
+  - name: Configure security group for SSH to challenges
+    ec2_group:
+      name: "{{ challenges_security_group }}"
+      description: Security rules for CTF challenges
+      vpc_id: "{{ subnet['vpc_id'] }}"
+      region: "{{ aws_region }}"
+      rules:
+        - proto: tcp
+          from_port: 22 
+          to_port:  22
+          cidr_ip: 0.0.0.0/0
+        - proto: icmp 
+          from_port: 8 
+          to_port: -1
+          cidr_ip: 0.0.0.0/0
+
+  - name: Configure security group for challenge ports
+    ec2_group:
+      name: "{{ challenges_security_group }}"
+      description: Security rules for CTF challenges
+      vpc_id: "{{ subnet['vpc_id'] }}"
+      region: "{{ aws_region }}"
+      purge_rules: false
+      rules:
+        - proto: tcp
+          from_port: "{{ item['hostPort'] }}"
+          to_port: "{{ item['hostPort'] }}"
+          cidr_ip: 0.0.0.0/0
+    with_items:
+      - "{{ challenges_containers }}"
+
+  - name: Create key pair from local file
+    ec2_key:
+      name: "{{ challenges_key_name }}"
+      key_material: "{{ item }}"
+      region: "{{ aws_region }}"
+    with_file: "{{ challenges_key_path }}"
+
+  - name: Provision EC2 container instance for challenges
+    ec2:
+      instance_type: "{{ challenges_instance_type }}"
+      image: "{{ challenges_ami_id }}"
+      key_name: "{{ challenges_key_name }}"
+      wait: true
+      exact_count: "{{ challenges_instance_count }}"
+      count_tag:
+        Name: "{{ challenges_name }}"
+      instance_tags:
+        Name: "{{ challenges_name }}"
+      vpc_subnet_id: "{{ challenges_subnet['subnet']['id'] }}"
+      instance_profile_name: ecsInstanceRole
+      region: "{{ aws_region }}"
+      group: "{{ challenges_security_group }}"
+      assign_public_ip: yes
+    register: challenges
+
+  - name: Debug - challenges instance_id
+    debug: var=challenges['tagged_instances'][0]['id'] verbosity=2
+
+  - name: Add ELB for challenges
+    ec2_elb_lb:
+      name: "{{ challenges_elb_name }}"
+      state: present
+      region: "{{ aws_region }}"
+      security_group_names:
+        - "{{ challenges_security_group }}"
+      subnets:
+        - "{{ challenges_subnet['subnet']['id'] }}"
+      listeners:
+        - protocol: tcp
+          load_balancer_port: "{{ item['hostPort'] }}"
+          instance_port: "{{ item['hostPort'] }}"
+    with_items:
+      - "{{ challenges_containers }}"
+
+  - name: Setup ECS cluster for challenges
+    ecs_cluster:
+      name: "{{ challenges_ecs_name }}"
+      state: present
+      region: "{{ aws_region }}"
+
+  - name: Debug - challenges_containers
+    debug: var=challenges_containers verbosity=2
+
+  - name: Setup ECS task definitions on the challenges cluster
+    ecs_taskdefinition:
+      containers:
+      - name: "{{ item['name'] }}"
+        # https://github.com/ansible/ansible-modules-extras/pull/1715
+        cpu: "{{ item['cpu'] }}"
+        memory: "{{ item['memory'] }}"
+        essential: true
+        image: "{{ item['image'] }}"
+        portMappings:
+          - containerPort: "{{ item['containerPort'] }}"
+            hostPort: "{{ item['hostPort'] }}"
+      state: present
+      family: "{{ item['name'] }}"
+      region: "{{ aws_region }}"
+    notify: Add ECS container instances challenges cluster
+    with_items:
+      - "{{ challenges_containers }}"
+
+  - name: Setup ECS service definitions
+    ecs_service:
+      name: "{{ item['name'] }}"
+      cluster: "{{ challenges_ecs_name }}"
+      region: "{{ aws_region }}"
+      task_definition: "{{ item['name'] }}"
+      state: present
+      role: ecsServiceRole
+      load_balancers:
+        - containerName: "{{ item['name'] }}"
+          containerPort: "{{ item['containerPort'] }}"
+          loadBalancerName: "{{ challenges_elb_name }}"
+      desired_count: "{{ challenges_instance_count }}"
+    with_items:
+      - "{{ challenges_containers }}"
+
+  - name: Debug - Print all variables
+    debug: var=hostvars[inventory_hostname] verbosity=4
+

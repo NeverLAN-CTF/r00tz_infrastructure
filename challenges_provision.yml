@@ -1,0 +1,34 @@
+- name: Setup and configure AWS components for scoreboard
+  hosts: all
+  become: true
+  gather_facts: false 
+  tasks:
+
+  - name: Fail if not on a CTF challenges instance
+    assert: { that: "ec2_tag_Name == '{{ challenges_name }}'" }
+
+  - name: Install pre-requisite packages
+    yum: name=* state=latest
+
+
+  - name: Add instance to the challenges server
+    template:
+      src: templates/ecs.config.j2
+      dest: /etc/ecs/ecs.config
+    notify: Restart ecs step 1
+
+  handlers:
+
+    - name: Restart ecs step 1 
+      command: stop ecs
+      notify: Restart ecs step 2
+
+    - name: Restart ecs step 2
+      file:
+        path: /var/lib/ecs/data/ecs_agent_data.json
+        state: absent
+      notify: Restart ecs step 3
+
+    - name: Restart ecs step 3
+      command: start ecs
+
