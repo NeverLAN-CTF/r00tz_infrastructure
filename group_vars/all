@@ -1,4 +1,7 @@
 ---
+# Authorized scoreboard key
+key_gulshan: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/AEvwFduimk8cidrT05aa40IgD4heKFJI6DPLczmUnDLEddW9QMW14osKBsnF7etDhm6opz6LnH3jGNPddLCJq7TPFBp8qPRHW7+7eW383DRIxFKYKY4J4E37LF9zyCX5eYPiwTzoESawBjJEP7/NKiJNAq4BDJjZyIdW81R/h0JQvfhYX+O/wol0DLYWnTkTfg9IRTq5L2xF17AuX7DDN1R9wW/wanpozlfcYQ9ZCEGOGhEzsKRqrQTdzb01+bbMC4jB6ey6zWyYhJkhXFIfTtgAfD159cyIcXQM4Glu9Mp2AyPtuHr9GrVxoRpS7yAtgKouqoHkDxZ+Dw9Vpki3 gulshan-r00tz"
+
 # Global
 aws_region: "us-west-2"
 
@@ -20,7 +23,7 @@ scoreboard_mysql_connections: 1000
 
 # http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html
 challenges_ami_id: "ami-241bd844"
-challenges_instance_count: 1
+challenges_instance_count: 2
 challenges_vpc_name: "r00tz_challenges_vpc"
 challenges_vpc_cidr_block: "172.19.0.0/16"
 challenges_name: "r00tz_challenges"
@@ -40,3 +43,28 @@ challenges_containers:
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/seasurf:latest"
     containerPort: 80
     hostPort: 1234
+  - name: "r00tz_CookieMonster"
+    cpu: 64
+    memory: 64
+    image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/cookiemonster:latest"
+    containerPort: 80
+    hostPort: 1235
+  - name: "r00tz_babyRSA"
+    cpu: 64
+    memory: 64
+    image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/babyrsa:latest"
+    containerPort: 80
+    hostPort: 1236
+  - name: "r00tz_whatTheHeader"
+    cpu: 64
+    memory: 64
+    image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/whattheheader:latest"
+    containerPort: 80
+    hostPort: 1237
+  - name: "r00tz_forgotThePass"
+    cpu: 64
+    memory: 64
+    image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/forgotthepass:latest"
+    containerPort: 80
+    hostPort: 1238
+
