@@ -67,4 +67,10 @@ challenges_containers:
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/forgotthepass:latest"
     containerPort: 80
     hostPort: 1238
+  - name: "r00tz_forgotThePass2"
+    cpu: 64
+    memory: 64
+    image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/forgotthepass2:latest"
+    containerPort: 80
+    hostPort: 1239
 
