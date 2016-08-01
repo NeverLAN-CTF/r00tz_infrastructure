@@ -42,7 +42,7 @@ challenges_containers:
     memory: 64
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/seasurf:latest"
     containerPort: 80
-    hostPort: 1234
+    hostPort: 6745
   - name: "r00tz_CookieMonster"
     cpu: 64
     memory: 64
@@ -54,23 +54,23 @@ challenges_containers:
     memory: 64
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/babyrsa:latest"
     containerPort: 80
-    hostPort: 1236
+    hostPort: 8401
   - name: "r00tz_whatTheHeader"
     cpu: 64
     memory: 64
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/whattheheader:latest"
     containerPort: 80
-    hostPort: 1237
+    hostPort: 3092
   - name: "r00tz_forgotThePass"
     cpu: 64
     memory: 64
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/forgotthepass:latest"
     containerPort: 80
-    hostPort: 1238
+    hostPort: 7129
   - name: "r00tz_forgotThePass2"
     cpu: 64
     memory: 64
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/forgotthepass2:latest"
     containerPort: 80
-    hostPort: 1239
+    hostPort: 9123
 
