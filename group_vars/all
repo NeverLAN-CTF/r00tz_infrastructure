@@ -27,7 +27,7 @@ challenges_instance_count: 2
 challenges_vpc_name: "r00tz_challenges_vpc"
 challenges_vpc_cidr_block: "172.19.0.0/16"
 challenges_name: "r00tz_challenges"
-challenges_instance_type: "t2.micro"
+challenges_instance_type: "t2.medium"
 challenges_cidr: "172.19.42.0/24"
 challenges_subnet_name: "r00tz_challenges_subnet"
 challenges_route_table_name: "r00tz_challenges_route"
@@ -38,8 +38,8 @@ challenges_elb_name: "r00tz-challenges-elb"
 challenges_ecs_name: "r00tz_challenges_ecs"
 challenges_containers:
   - name: "r00tz_seasurf"
-    cpu: 64
-    memory: 64
+    cpu: 128
+    memory: 512
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/seasurf:latest"
     containerPort: 80
     hostPort: 6745
@@ -62,14 +62,14 @@ challenges_containers:
     containerPort: 80
     hostPort: 3092
   - name: "r00tz_forgotThePass"
-    cpu: 64
-    memory: 64
+    cpu: 128
+    memory: 512
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/forgotthepass:latest"
     containerPort: 80
     hostPort: 7129
   - name: "r00tz_forgotThePass2"
-    cpu: 64
-    memory: 64
+    cpu: 128
+    memory: 512
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/forgotthepass2:latest"
     containerPort: 80
     hostPort: 9123
