@@ -13,6 +13,7 @@ Apply the following policies to the r00tz group:
 - AmazonEC2FullAccess  
 - AmazonEC2ContainerServiceFullAccess  
 - AmazonVPCFullAccess  
+- AmazonEC2ContainerRegistryPowerUser
 
 Next take the access key and secret key generated during the user creation and export them to your current environment for the ec2.py ansible dynamic inventory script to use.  
 
