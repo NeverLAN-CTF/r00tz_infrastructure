@@ -1,0 +1,96 @@
+---
+- name: Setup AWS components for challenges infrastructure
+  hosts: localhost
+  connection: local
+  tasks:
+
+  # https://github.com/ansible/ansible-modules-extras/issues/1169#issuecomment-179514377
+
+  - name: Check latest version of task definitions
+    ecs_taskdefinition:
+      containers:
+      - name: "{{ item['name'] }}"
+        cpu: "{{ item['cpu'] }}"
+        memory: "{{ item['memory'] }}"
+        essential: true
+        image: "{{ item['image'] }}"
+        portMappings:
+          - containerPort: "{{ item['containerPort'] }}"
+            hostPort: "{{ item['hostPort'] }}"
+      state: present
+      family: "{{ item['name'] }}"
+      region: "{{ aws_region }}"
+    with_items:
+      - "{{ challenges_containers }}"
+    register: definitions
+
+  - name: Shorten definitions namespace.
+    set_fact: definitions={{ definitions['results'] }}
+    when: definitions['results'] is defined
+
+  - name: Debug - definitions
+    debug: var=definitions[0]['taskdefinition'] verbosity=2
+
+  - name: Remove ECS task definitions on the challenges cluster
+    ecs_taskdefinition:
+      state: absent
+      family: "{{ item['taskdefinition']['family'] }}"
+      revision: "{{ item['taskdefinition']['revision'] }}"
+      region: "{{ aws_region }}"
+    with_items:
+      - "{{ definitions }}"
+
+  - name: Setup ECS task definitions on the challenges cluster
+    ecs_taskdefinition:
+      containers:
+      - name: "{{ item['taskdefinition']['containerDefinitions'][0]['name'] }}"
+        cpu: "{{ item['taskdefinition']['containerDefinitions'][0]['cpu'] }}"
+        memory: "{{ item['taskdefinition']['containerDefinitions'][0]['memory'] }}"
+        essential: true
+        image: "{{ item['taskdefinition']['containerDefinitions'][0]['image'] }}"
+        portMappings:
+          - containerPort: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort'] }}"
+            hostPort: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['hostPort'] }}"
+      state: present
+      family: "{{  item['taskdefinition']['family'] }}"
+      region: "{{ aws_region }}"
+      revision: "{{ item['taskdefinition']['revision'] }}"
+    with_items:
+      - "{{ definitions }}"
+
+  - name: Take down running services
+    ecs_service:
+      name: "{{ item['taskdefinition']['containerDefinitions'][0]['name'] }}"
+      cluster: "{{ challenges_ecs_name }}"
+      region: "{{ aws_region }}"
+      task_definition: "{{ item['taskdefinition']['containerDefinitions'][0]['name'] }}"
+      state: present
+      role: ecsServiceRole
+      load_balancers:
+        - containerName: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort'] }}"
+          containerPort: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort'] }}"
+          loadBalancerName: "{{ challenges_elb_name }}"
+      desired_count: 0
+    with_items:
+      - "{{ definitions }}"
+
+
+  - name: Setup ECS service definitions
+    ecs_service:
+      name: "{{ item['taskdefinition']['containerDefinitions'][0]['name'] }}"
+      cluster: "{{ challenges_ecs_name }}"
+      region: "{{ aws_region }}"
+      task_definition: "{{ item['taskdefinition']['containerDefinitions'][0]['name'] }}:{{ item['taskdefinition']['revision'] + 1 }}"
+      state: present
+      role: ecsServiceRole
+      load_balancers:
+        - containerName: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort'] }}"
+          containerPort: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort'] }}"
+          loadBalancerName: "{{ challenges_elb_name }}"
+      desired_count: "{{ challenges_instance_count }}"
+    with_items:
+      - "{{ definitions }}"
+  
+  - name: Debug - Print all variables
+    debug: var=hostvars[inventory_hostname] verbosity=4
+
