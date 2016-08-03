@@ -37,38 +37,44 @@ challenges_key_path: "~/.ssh/r00tz_rsa.pub"
 challenges_elb_name: "r00tz-challenges-elb"
 challenges_ecs_name: "r00tz_challenges_ecs"
 challenges_containers:
+# (t2.medium 4GB RAM  2048 CPU units) x 2
   - name: "r00tz_seasurf"
-    cpu: 128
-    memory: 512
+    cpu: 1024
+    memory: 2048
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/seasurf:latest"
     containerPort: 80
     hostPort: 6745
+
   - name: "r00tz_CookieMonster"
-    cpu: 64
-    memory: 64
+    cpu: 256
+    memory: 256
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/cookiemonster:latest"
     containerPort: 80
     hostPort: 1235
+
   - name: "r00tz_babyRSA"
-    cpu: 64
-    memory: 64
+    cpu: 256
+    memory: 256
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/babyrsa:latest"
     containerPort: 80
     hostPort: 8401
+
   - name: "r00tz_whatTheHeader"
-    cpu: 64
-    memory: 64
+    cpu: 256
+    memory: 256
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/whattheheader:latest"
     containerPort: 80
     hostPort: 3092
+
   - name: "r00tz_forgotThePass"
-    cpu: 128
+    cpu: 750
     memory: 512
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/forgotthepass:latest"
     containerPort: 80
     hostPort: 7129
+
   - name: "r00tz_forgotThePass2"
-    cpu: 128
+    cpu: 750
     memory: 512
     image: "067416812167.dkr.ecr.us-west-2.amazonaws.com/r00tz/forgotthepass2:latest"
     containerPort: 80
