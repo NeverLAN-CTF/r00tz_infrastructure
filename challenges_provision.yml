@@ -7,9 +7,24 @@
   - name: Fail if not on a CTF challenges instance
     assert: { that: "ec2_tag_Name == '{{ challenges_name }}'" }
 
-  - name: Install pre-requisite packages
+  - name: Update yum repository and upgrade packages
     yum: name=* state=latest
 
+  - name: Install packages for monitoring containers
+    yum:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - python27-pip
+
+  - name: Update pip
+    command: pip install --upgrade pip creates=/usr/local/bin/pip
+
+  - name: Install docker-py pip package
+    pip:
+      name: docker-py
+      state: present
+      executable: /usr/local/bin/pip
 
   - name: Add instance to the challenges server
     template:

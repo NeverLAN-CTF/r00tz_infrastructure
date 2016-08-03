@@ -159,7 +159,7 @@
         - containerName: "{{ item['name'] }}"
           containerPort: "{{ item['containerPort'] }}"
           loadBalancerName: "{{ challenges_elb_name }}"
-      desired_count: "{{ challenges_instance_count }}"
+      desired_count: 1
     with_items:
       - "{{ challenges_containers }}"
 
