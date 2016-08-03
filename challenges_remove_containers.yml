@@ -56,40 +56,6 @@
     with_items:
       - "{{ definitions }}"
 
-    #- name: Setup ECS task definitions on the challenges cluster
-    #- ecs_taskdefinition:
-    #-   containers:
-    #-   - name: "{{ item['taskdefinition']['containerDefinitions'][0]['name'] }}"
-    #-     cpu: "{{ item['taskdefinition']['containerDefinitions'][0]['cpu'] }}"
-    #-     memory: "{{ item['taskdefinition']['containerDefinitions'][0]['memory'] }}"
-    #-     essential: true
-    #-     image: "{{ item['taskdefinition']['containerDefinitions'][0]['image'] }}"
-    #-     portMappings:
-    #-       - containerPort: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort'] }}"
-    #-         hostPort: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['hostPort'] }}"
-    #-   state: present
-    #-   family: "{{  item['taskdefinition']['family'] }}"
-    #-   region: "{{ aws_region }}"
-    #-   revision: "{{ item['taskdefinition']['revision'] }}"
-    #- with_items:
-    #-   - "{{ definitions }}"
-
-    #- name: Setup ECS service definitions
-    #- ecs_service:
-    #-   name: "{{ item['taskdefinition']['containerDefinitions'][0]['name'] }}"
-    #-   cluster: "{{ challenges_ecs_name }}"
-    #-   region: "{{ aws_region }}"
-    #-   task_definition: "{{ item['taskdefinition']['containerDefinitions'][0]['name'] }}:{{ item['taskdefinition']['revision'] + 1 }}"
-    #-   state: present
-    #-   role: ecsServiceRole
-    #-   load_balancers:
-    #-     - containerName: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort'] }}"
-    #-       containerPort: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort'] }}"
-    #-       loadBalancerName: "{{ challenges_elb_name }}"
-    #-   desired_count: "{{ challenges_instance_count }}"
-    #- with_items:
-    #-   - "{{ definitions }}"
-  
   - name: Debug - Print all variables
     debug: var=hostvars[inventory_hostname] verbosity=4
 

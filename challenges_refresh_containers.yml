@@ -87,7 +87,7 @@
         - containerName: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort'] }}"
           containerPort: "{{ item['taskdefinition']['containerDefinitions'][0]['portMappings'][0]['containerPort'] }}"
           loadBalancerName: "{{ challenges_elb_name }}"
-      desired_count: "{{ challenges_instance_count }}"
+      desired_count: 1
     with_items:
       - "{{ definitions }}"
   
